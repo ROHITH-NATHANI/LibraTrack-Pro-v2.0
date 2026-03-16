@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }} — LibraTrack Pro{% endblock %}
+{% block content %}
+
+<div class="dash-header">
+  <div>
+    <a href="{{ url_for('index') }}" class="back-link"><i class="bi bi-arrow-left me-1"></i>Dashboard</a>
+    <h1 class="page-title mt-1">Book Details</h1>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('edit_book', bid=book.id) }}" class="btn-outline-action"><i class="bi bi-pencil me-1"></i>Edit</a>
+    {% if book.available > 0 %}
+      <a href="{{ url_for('borrow', bid=book.id) }}" class="btn-primary-action"><i class="bi bi-box-arrow-right me-1"></i>Issue Book</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="detail-layout">
+  <!-- Cover Card -->
+  <div class="detail-cover-card" style="--spine: {{ book.cover_color }}">
+    <div class="dc-visual">
+      <div class="dc-spine-strip"></div>
+      <div class="dc-cover-face">
+        <div class="dc-genre-label">{{ book.genre }}</div>
+        <div class="dc-title-big">{{ book.title }}</div>
+        <div class="dc-author-label">{{ book.author }}</div>
+      </div>
+    </div>
+    <div class="dc-badges mt-3">
+      <span class="avail-badge {% if book.available>0 %}av-yes{% else %}av-no{% endif %}">
+        <i class="bi bi-{% if book.available>0 %}check-circle{% else %}x-circle{% endif %} me-1"></i>
+        {{ book.available }} / {{ book.total_copies }} available
+      </span>
+    </div>
+    {% if book.rating_count > 0 %}
+    <div class="dc-rating mt-2">
+      {% for i in range(5) %}
+        <i class="bi bi-star{% if i < book.rating|int %}-fill{% elif i < book.rating %}-half{% endif %}"></i>
+      {% endfor %}
+      <span>{{ "%.1f"|format(book.rating) }} ({{ book.rating_count }} ratings)</span>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Info Card -->
+  <div class="detail-info-card">
+    <h2 class="di-title">{{ book.title }}</h2>
+    <p class="di-author">by {{ book.author }}</p>
+    {% if book.description %}
+      <p class="di-desc">{{ book.description }}</p>
+    {% endif %}
+    <div class="di-meta-grid">
+      <div class="dim-item"><span class="dim-lbl">ISBN</span><span class="dim-val">{{ book.isbn or '—' }}</span></div>
+      <div class="dim-item"><span class="dim-lbl">Publisher</span><span class="dim-val">{{ book.publisher or '—' }}</span></div>
+      <div class="dim-item"><span class="dim-lbl">Year</span><span class="dim-val">{{ book.year or '—' }}</span></div>
+      <div class="dim-item"><span class="dim-lbl">Genre</span><span class="dim-val">{{ book.genre }}</span></div>
+      <div class="dim-item"><span class="dim-lbl">Total Copies</span><span class="dim-val">{{ book.total_copies }}</span></div>
+      <div class="dim-item"><span class="dim-lbl">Available</span><span class="dim-val">{{ book.available }}</span></div>
+      <div class="dim-item"><span class="dim-lbl">Added On</span><span class="dim-val">{{ book.added_on }}</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Borrow History -->
+<div class="detail-history mt-4">
+  <h3 class="section-title mb-3"><i class="bi bi-clock-history me-2"></i>Borrow History</h3>
+  {% if history %}
+  <div class="table-card">
+    <table class="table-pro">
+      <thead><tr><th>Borrower</th><th>Email</th><th>Issued</th><th>Due</th><th>Returned</th><th>Fine</th></tr></thead>
+      <tbody>
+        {% for h in history %}
+        <tr class="{% if not h.returned and h.due_date < today %}tr-overdue{% endif %}">
+          <td><strong>{{ h.name }}</strong></td>
+          <td class="text-muted small">{{ h.email }}</td>
+          <td class="text-muted small">{{ h.borrow_date }}</td>
+          <td class="{% if not h.returned and h.due_date < today %}text-danger fw-bold{% endif %}">{{ h.due_date }}</td>
+          <td>
+            {% if h.returned %}
+              <span class="pill pill-green">{{ h.return_date }}</span>
+            {% else %}
+              <span class="pill pill-amber">Pending</span>
+            {% endif %}
+          </td>
+          <td>{% if h.fine > 0 %}<span class="text-danger fw-bold">₹{{ h.fine }}</span>{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="empty-state" style="padding:2rem">
+      <div class="es-icon" style="font-size:2rem">📋</div>
+      <p>No borrow history yet.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}LibraTrack Pro{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+
+<!-- ── Sidebar ─────────────────────────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="{{ url_for('home') }}" class="brand">
+      <span class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="2" y="3" width="7" height="16" rx="1.5" fill="currentColor" opacity=".9"/>
+          <rect x="11" y="3" width="5" height="16" rx="1.5" fill="currentColor" opacity=".6"/>
+          <rect x="17" y="5" width="3" height="12" rx="1.5" fill="currentColor" opacity=".35"/>
+        </svg>
+      </span>
+      <span class="brand-name">LibraTrack</span>
+    </a>
+    <button class="sidebar-close d-lg-none" id="sidebarClose"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="{{ url_for('home') }}" class="nav-item {% if request.endpoint=='home' %}active{% endif %}">
+      <i class="bi bi-house"></i><span>Home</span>
+    </a>
+    <a href="{{ url_for('index') }}" class="nav-item {% if request.endpoint=='index' %}active{% endif %}">
+      <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('add_book') }}" class="nav-item {% if request.endpoint=='add_book' %}active{% endif %}">
+      <i class="bi bi-plus-square"></i><span>Add Book</span>
+    </a>
+    <div class="nav-section-label mt-3">Circulation</div>
+    <a href="{{ url_for('borrowers') }}" class="nav-item {% if request.endpoint=='borrowers' %}active{% endif %}">
+      <i class="bi bi-people"></i><span>Borrowers</span>
+    </a>
+    <a href="{{ url_for('members') }}" class="nav-item {% if request.endpoint=='members' %}active{% endif %}">
+      <i class="bi bi-person-badge"></i><span>Members</span>
+    </a>
+    <div class="nav-section-label mt-3">Insights</div>
+    <a href="{{ url_for('reports') }}" class="nav-item {% if request.endpoint=='reports' %}active{% endif %}">
+      <i class="bi bi-bar-chart-line"></i><span>Reports</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sf-version">LibraTrack Pro v2.0</div>
+    <div class="sf-sub">Flask · SQLite · Bootstrap 5</div>
+  </div>
+</aside>
+
+<!-- ── Overlay ──────────────────────────────────────────────────────────────── -->
+<div class="sidebar-overlay" id="overlay"></div>
+
+<!-- ── Main Wrapper ─────────────────────────────────────────────────────────── -->
+<div class="main-wrapper">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <button class="topbar-toggle d-lg-none" id="sidebarOpen"><i class="bi bi-list"></i></button>
+    <div class="topbar-search">
+      <i class="bi bi-search"></i>
+      <input type="text" id="global-search" placeholder="Quick search books…" autocomplete="off"/>
+      <div class="search-dropdown" id="search-dropdown"></div>
+    </div>
+    <div class="topbar-right">
+      <a href="{{ url_for('borrowers', status='overdue') }}" class="topbar-btn" title="Overdue Books">
+        <i class="bi bi-exclamation-triangle"></i>
+      </a>
+      <a href="{{ url_for('add_book') }}" class="topbar-cta">
+        <i class="bi bi-plus-lg me-1"></i>Add Book
+      </a>
+    </div>
+  </header>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-zone">
+        {% for cat, msg in messages %}
+          <div class="flash-pill flash-{{ cat }}">
+            <i class="bi bi-{% if cat=='success' %}check-circle-fill{% elif cat=='error' or cat=='danger' %}x-circle-fill{% elif cat=='warning' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %}"></i>
+            <span>{{ msg }}</span>
+            <button onclick="this.closest('.flash-pill').remove()">×</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Page Content -->
+  <main class="page-content">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

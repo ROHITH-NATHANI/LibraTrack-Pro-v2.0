@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Members — LibraTrack Pro{% endblock %}
+{% block content %}
+
+<div class="dash-header">
+  <div>
+    <a href="{{ url_for('index') }}" class="back-link"><i class="bi bi-arrow-left me-1"></i>Dashboard</a>
+    <p class="page-eyebrow">People</p>
+    <h1 class="page-title mt-1">Members</h1>
+  </div>
+</div>
+
+<div class="members-layout">
+  <!-- Register Form -->
+  <div class="member-form-col">
+    <div class="form-card">
+      <h3 class="fc-title mb-4"><i class="bi bi-person-plus me-2"></i>Register New Member</h3>
+      <form id="member-form" method="POST" novalidate>
+        <div class="form-group mb-3">
+          <label class="fl">Full Name <span class="req">*</span></label>
+          <input type="text" name="name" id="m-name" class="fi" placeholder="Full name">
+          <div class="ferr" id="err-mname"></div>
+        </div>
+        <div class="form-group mb-3">
+          <label class="fl">Email <span class="req">*</span></label>
+          <input type="email" name="email" id="m-email" class="fi" placeholder="member@email.com">
+          <div class="ferr" id="err-memail"></div>
+        </div>
+        <div class="form-group mb-3">
+          <label class="fl">Phone</label>
+          <input type="tel" name="phone" class="fi" placeholder="+91 XXXXX XXXXX">
+        </div>
+        <div class="form-group mb-3">
+          <label class="fl">Password <span class="req">*</span></label>
+          <div class="password-wrap">
+            <input type="password" name="password" id="m-password" class="fi" placeholder="Min 6 characters">
+            <button type="button" class="pw-toggle" id="pw-toggle"><i class="bi bi-eye"></i></button>
+          </div>
+          <div class="pw-strength-bar mt-2"><div id="pw-bar"></div></div>
+          <div class="ferr" id="err-mpwd"></div>
+        </div>
+        <div class="form-actions mt-3">
+          <button type="submit" class="btn-submit w-100"><i class="bi bi-person-check me-2"></i>Register Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Members List -->
+  <div class="member-list-col">
+    <div class="section-header mb-3">
+      <h2 class="section-title">All Members</h2>
+      <span class="section-count">{{ members|length }}</span>
+    </div>
+    {% if members %}
+    <div class="members-grid">
+      {% for m in members %}
+      <div class="member-card {% if not m.active %}mc-inactive{% endif %}">
+        <div class="mc-avatar">{{ m.name[0].upper() }}</div>
+        <div class="mc-info">
+          <div class="mc-name">{{ m.name }}</div>
+          <div class="mc-email text-muted small">{{ m.email }}</div>
+          {% if m.phone %}<div class="mc-phone text-muted small"><i class="bi bi-telephone me-1"></i>{{ m.phone }}</div>{% endif %}
+          <div class="mc-meta">
+            <span class="pill {% if m.active %}pill-green{% else %}pill-gray{% endif %}">
+              {% if m.active %}Active{% else %}Inactive{% endif %}
+            </span>
+            {% if m.active_loans > 0 %}
+              <span class="pill pill-blue">{{ m.active_loans }} loan{% if m.active_loans!=1 %}s{% endif %}</span>
+            {% endif %}
+            <span class="mc-joined text-muted">Joined {{ m.joined }}</span>
+          </div>
+        </div>
+        {% if m.active %}
+        <button class="mc-del-btn" onclick="if(confirm('Deactivate this member?')) window.location='/members/delete/{{ m.id }}'">
+          <i class="bi bi-person-dash"></i>
+        </button>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:2rem">
+      <div class="es-icon">👤</div>
+      <h4>No members yet</h4>
+      <p>Register your first library member.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

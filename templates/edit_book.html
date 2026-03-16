@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Edit Book — LibraTrack Pro{% endblock %}
+{% block content %}
+
+<div class="dash-header">
+  <div>
+    <a href="{{ url_for('book_detail', bid=book.id) }}" class="back-link"><i class="bi bi-arrow-left me-1"></i>Book Details</a>
+    <h1 class="page-title mt-1">Edit Book</h1>
+  </div>
+</div>
+
+<div class="form-layout">
+  <div class="form-main">
+    <div class="form-card">
+      <form id="edit-book-form" method="POST" novalidate>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="fl">Book Title <span class="req">*</span></label>
+            <input type="text" name="title" id="f-title" class="fi" value="{{ book.title }}">
+            <div class="ferr" id="err-title"></div>
+          </div>
+          <div class="form-group">
+            <label class="fl">Author Name <span class="req">*</span></label>
+            <input type="text" name="author" id="f-author" class="fi" value="{{ book.author }}">
+            <div class="ferr" id="err-author"></div>
+          </div>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="fl">Genre <span class="req">*</span></label>
+            <select name="genre" id="f-genre" class="fi">
+              {% for g in ['Fiction','Non-Fiction','Technology','Science','History','Biography','Self-Help','Mystery','Fantasy','Romance','Children','Academic','Poetry','Philosophy'] %}
+                <option value="{{ g }}" {% if book.genre==g %}selected{% endif %}>{{ g }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="fl">Publisher</label>
+            <input type="text" name="publisher" class="fi" value="{{ book.publisher or '' }}">
+          </div>
+          <div class="form-group">
+            <label class="fl">Year</label>
+            <input type="number" name="year" class="fi" min="1000" max="2026" value="{{ book.year or '' }}">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="fl">ISBN</label>
+            <input type="text" name="isbn" class="fi" value="{{ book.isbn or '' }}">
+          </div>
+          <div class="form-group">
+            <label class="fl">Total Copies</label>
+            <input type="number" name="copies" class="fi" min="1" value="{{ book.total_copies }}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="fl">Description</label>
+          <textarea name="description" class="fi" rows="3">{{ book.description or '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="fl">Cover Color</label>
+          <div class="color-picker-row">
+            {% set colors = ['#e8d5b7','#c8dfc8','#d0d8f0','#f0d8d0','#ddd0f0','#f0eac8','#d0eef0','#f0dde8','#e0e8d8','#f8e8d0'] %}
+            {% for col in colors %}
+              <label class="cp-swatch">
+                <input type="radio" name="cover_color" value="{{ col }}" {% if book.cover_color==col %}checked{% endif %}>
+                <span style="background:{{ col }}"></span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="form-actions mt-4">
+          <button type="submit" class="btn-submit"><i class="bi bi-check-lg me-2"></i>Save Changes</button>
+          <a href="{{ url_for('book_detail', bid=book.id) }}" class="btn-cancel">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="form-preview">
+    <div class="preview-label">Current Info</div>
+    <div class="book-card preview-card" style="--spine: {{ book.cover_color }}" id="preview-card">
+      <div class="bc-spine"></div>
+      <div class="bc-body">
+        <div class="bc-top">
+          <span class="bc-genre" id="prev-genre">{{ book.genre }}</span>
+          <span class="bc-avail av-yes" id="prev-avail">{{ book.available }} left</span>
+        </div>
+        <h3 class="bc-title" id="prev-title">{{ book.title }}</h3>
+        <p class="bc-author"><i class="bi bi-person me-1"></i><span id="prev-author">{{ book.author }}</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

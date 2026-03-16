@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Borrowers — LibraTrack Pro{% endblock %}
+{% block content %}
+
+<div class="dash-header">
+  <div>
+    <a href="{{ url_for('index') }}" class="back-link"><i class="bi bi-arrow-left me-1"></i>Dashboard</a>
+    <p class="page-eyebrow">Circulation</p>
+    <h1 class="page-title mt-1">Borrowers</h1>
+  </div>
+</div>
+
+<!-- Tab Nav -->
+<div class="tab-bar mb-4">
+  <a href="{{ url_for('borrowers', status='active') }}" class="tab-item {% if status=='active' %}active{% endif %}">
+    <i class="bi bi-clock me-1"></i>Active <span class="tab-count">{{ counts.active }}</span>
+  </a>
+  <a href="{{ url_for('borrowers', status='overdue') }}" class="tab-item {% if status=='overdue' %}active{% endif %} {% if counts.overdue>0 %}tab-warn{% endif %}">
+    <i class="bi bi-exclamation-triangle me-1"></i>Overdue <span class="tab-count">{{ counts.overdue }}</span>
+  </a>
+  <a href="{{ url_for('borrowers', status='returned') }}" class="tab-item {% if status=='returned' %}active{% endif %}">
+    <i class="bi bi-check2-circle me-1"></i>Returned <span class="tab-count">{{ counts.returned }}</span>
+  </a>
+</div>
+
+{% if rows %}
+<div class="table-card">
+  <table class="table-pro">
+    <thead>
+      <tr>
+        <th>#</th><th>Book</th><th>Borrower</th><th>Contact</th>
+        <th>Issued</th><th>Due Date</th><th>Status</th>
+        {% if status!='returned' %}<th>Fine</th><th>Action</th>{% else %}<th>Returned</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      {% set fine = calc_fine(r.due_date, r.returned) %}
+      <tr class="{% if not r.returned and r.due_date < today %}tr-overdue{% endif %}">
+        <td class="text-muted small">{{ loop.index }}</td>
+        <td>
+          <div class="td-title">{{ r.title }}</div>
+          <div class="td-sub text-muted">{{ r.author }}</div>
+        </td>
+        <td><strong>{{ r.name }}</strong></td>
+        <td>
+          <div class="td-sub">{{ r.email }}</div>
+          {% if r.phone %}<div class="td-sub text-muted">{{ r.phone }}</div>{% endif %}
+        </td>
+        <td class="text-muted small">{{ r.borrow_date }}</td>
+        <td>
+          <span class="{% if not r.returned and r.due_date < today %}text-danger fw-bold{% endif %}">
+            {{ r.due_date }}
+          </span>
+        </td>
+        <td>
+          {% if r.returned %}
+            <span class="pill pill-green"><i class="bi bi-check-circle me-1"></i>Returned</span>
+          {% elif r.due_date < today %}
+            <span class="pill pill-red"><i class="bi bi-exclamation-circle me-1"></i>Overdue</span>
+          {% else %}
+            <span class="pill pill-blue"><i class="bi bi-clock me-1"></i>Active</span>
+          {% endif %}
+        </td>
+        {% if status!='returned' %}
+        <td>
+          {% if fine > 0 %}
+            <span class="text-danger fw-bold small">₹{{ fine }}</span>
+          {% else %}—{% endif %}
+        </td>
+        <td>
+          {% if not r.returned %}
+          <a href="{{ url_for('return_book', rid=r.id) }}"
+             class="btn-return"
+             onclick="return confirm('Mark as returned? Fine will be calculated.')">
+            <i class="bi bi-arrow-return-left me-1"></i>Return
+          </a>
+          {% endif %}
+        </td>
+        {% else %}
+        <td class="text-muted small">{{ r.return_date }}</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="results-count mt-3">{{ rows|length }} record{% if rows|length!=1 %}s{% endif %}</p>
+{% else %}
+<div class="empty-state">
+  <div class="es-icon">{% if status=='overdue' %}⏰{% elif status=='returned' %}✅{% else %}📋{% endif %}</div>
+  <h4>No {{ status }} records</h4>
+  <p>{% if status=='active' %}No books are currently on loan.{% elif status=='overdue' %}Great — no overdue books!{% else %}No returned books yet.{% endif %}</p>
+</div>
+{% endif %}
+{% endblock %}

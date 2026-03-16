@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Book Issued — LibraTrack Pro{% endblock %}
+{% block content %}
+<div class="success-page">
+  <div class="success-card">
+    <div class="success-anim">✅</div>
+    <h2 class="success-title">Book Issued Successfully!</h2>
+    <p class="success-msg">Issued to <strong>{{ name }}</strong></p>
+    <div class="success-book">"{{ title }}"</div>
+    {% if due %}
+    <div class="due-chip mt-3">
+      <i class="bi bi-calendar-check me-2"></i>Due back by <strong>{{ due }}</strong>
+    </div>
+    <p class="text-muted small mt-2">Late returns incur a fine of ₹5 per day.</p>
+    {% endif %}
+    <div class="mt-5 d-flex gap-3 justify-content-center flex-wrap">
+      <a href="{{ url_for('index') }}" class="btn-submit"><i class="bi bi-grid me-2"></i>Dashboard</a>
+      <a href="{{ url_for('borrowers') }}" class="btn-cancel"><i class="bi bi-people me-2"></i>Borrowers</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

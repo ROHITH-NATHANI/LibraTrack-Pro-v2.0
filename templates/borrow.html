@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Issue Book — LibraTrack Pro{% endblock %}
+{% block content %}
+
+<div class="dash-header">
+  <div>
+    <a href="{{ url_for('index') }}" class="back-link"><i class="bi bi-arrow-left me-1"></i>Dashboard</a>
+    <h1 class="page-title mt-1">Issue Book</h1>
+    <p class="page-sub">Record borrower details and set the due date.</p>
+  </div>
+</div>
+
+<!-- Book Strip -->
+<div class="book-strip" style="--spine: {{ book.cover_color }}">
+  <div class="bs-spine"></div>
+  <div class="bs-icon"><i class="bi bi-book-half"></i></div>
+  <div class="bs-info">
+    <div class="bs-title">{{ book.title }}</div>
+    <div class="bs-author text-muted small"><i class="bi bi-person me-1"></i>{{ book.author }} &bull; {{ book.genre }}</div>
+  </div>
+  <div class="bs-avail">
+    <span class="avail-badge av-yes"><i class="bi bi-check-circle me-1"></i>{{ book.available }} cop{% if book.available!=1 %}ies{% else %}y{% endif %} left</span>
+  </div>
+</div>
+
+<div class="form-layout">
+  <div class="form-main">
+    <div class="form-card">
+      <form id="borrow-form" method="POST" novalidate>
+
+        <!-- Auto-fill from member -->
+        {% if members %}
+        <div class="form-group mb-4">
+          <label class="fl">Select Registered Member <span class="text-muted small">(optional — auto-fills details)</span></label>
+          <select name="member_id" id="member-select" class="fi">
+            <option value="">— Walk-in / Manual entry —</option>
+            {% for m in members %}
+              <option value="{{ m.id }}" data-name="{{ m.name }}" data-email="{{ m.email }}" data-phone="{{ m.phone or '' }}">
+                {{ m.name }} ({{ m.email }})
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="member-divider"><span>Borrower Details</span></div>
+        {% endif %}
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="fl">Full Name <span class="req">*</span></label>
+            <input type="text" name="name" id="b-name" class="fi" placeholder="Borrower's full name" value="{{ form_data.get('name','') }}">
+            <div class="ferr" id="err-name"></div>
+          </div>
+          <div class="form-group">
+            <label class="fl">Email Address <span class="req">*</span></label>
+            <input type="email" name="email" id="b-email" class="fi" placeholder="borrower@email.com" value="{{ form_data.get('email','') }}">
+            <div class="ferr" id="err-email"></div>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="fl">Phone Number</label>
+            <input type="tel" name="phone" id="b-phone" class="fi" placeholder="+91 XXXXX XXXXX" value="{{ form_data.get('phone','') }}">
+          </div>
+          <div class="form-group">
+            <label class="fl">Due Date <span class="req">*</span></label>
+            <input type="date" name="due_date" id="b-due" class="fi" value="{{ form_data.get('due_date','') }}">
+            <div class="ferr" id="err-due"></div>
+          </div>
+        </div>
+
+        <!-- Quick duration buttons -->
+        <div class="duration-shortcuts">
+          <span class="ds-label">Quick select:</span>
+          <button type="button" class="ds-btn" data-days="7">1 Week</button>
+          <button type="button" class="ds-btn" data-days="14">2 Weeks</button>
+          <button type="button" class="ds-btn" data-days="30">1 Month</button>
+          <button type="button" class="ds-btn" data-days="60">2 Months</button>
+        </div>
+
+        <div class="form-actions mt-4">
+          <button type="submit" class="btn-submit"><i class="bi bi-box-arrow-right me-2"></i>Confirm Issue</button>
+          <a href="{{ url_for('index') }}" class="btn-cancel">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="form-preview">
+    <div class="preview-label">Issue Summary</div>
+    <div class="issue-summary-card">
+      <div class="is-row"><i class="bi bi-book"></i><span id="sum-title">{{ book.title }}</span></div>
+      <div class="is-row"><i class="bi bi-person"></i><span id="sum-name">—</span></div>
+      <div class="is-row"><i class="bi bi-envelope"></i><span id="sum-email">—</span></div>
+      <div class="is-row"><i class="bi bi-calendar-check"></i><span id="sum-due">—</span></div>
+      <div class="is-row"><i class="bi bi-clock"></i><span id="sum-days">—</span></div>
+    </div>
+    <div class="fine-note mt-3"><i class="bi bi-info-circle me-1"></i>Late return fine: <strong>₹5 per day</strong></div>
+  </div>
+</div>
+{% endblock %}

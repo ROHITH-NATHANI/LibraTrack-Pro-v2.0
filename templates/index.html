@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — LibraTrack Pro{% endblock %}
+{% block content %}
+
+<div class="dash-header">
+  <div>
+    <p class="page-eyebrow">Library Management</p>
+    <h1 class="page-title">Dashboard</h1>
+  </div>
+  <a href="{{ url_for('add_book') }}" class="btn-primary-action">
+    <i class="bi bi-plus-lg"></i> New Book
+  </a>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon si-blue"><i class="bi bi-book-half"></i></div>
+    <div class="stat-body">
+      <div class="stat-num">{{ stats.total }}</div>
+      <div class="stat-lbl">Total Books</div>
+    </div>
+    <div class="stat-trend up">+{{ stats.returned_today }} today</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si-amber"><i class="bi bi-box-arrow-right"></i></div>
+    <div class="stat-body">
+      <div class="stat-num">{{ stats.borrowed }}</div>
+      <div class="stat-lbl">On Loan</div>
+    </div>
+    <div class="stat-trend">Active loans</div>
+  </div>
+  <div class="stat-card {% if stats.overdue > 0 %}stat-card-warn{% endif %}">
+    <div class="stat-icon si-red"><i class="bi bi-clock-history"></i></div>
+    <div class="stat-body">
+      <div class="stat-num">{{ stats.overdue }}</div>
+      <div class="stat-lbl">Overdue</div>
+    </div>
+    <div class="stat-trend {% if stats.overdue > 0 %}warn{% endif %}">
+      {% if stats.overdue > 0 %}Needs attention{% else %}All on time{% endif %}
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si-green"><i class="bi bi-person-check"></i></div>
+    <div class="stat-body">
+      <div class="stat-num">{{ stats.members }}</div>
+      <div class="stat-lbl">Members</div>
+    </div>
+    <div class="stat-trend up">Registered</div>
+  </div>
+</div>
+
+<!-- Filter & Search Bar -->
+<div class="filter-row">
+  <form method="GET" action="{{ url_for('index') }}" id="filter-form">
+    <div class="filter-inner">
+      <div class="fi-search">
+        <i class="bi bi-search"></i>
+        <input type="text" name="q" class="fi-input" placeholder="Search title, author, ISBN…" value="{{ search }}">
+      </div>
+      <select name="genre" class="fi-select" onchange="this.form.submit()">
+        <option value="">All Genres</option>
+        {% for g in genres %}
+          <option value="{{ g.genre }}" {% if sel_genre==g.genre %}selected{% endif %}>{{ g.genre }}</option>
+        {% endfor %}
+      </select>
+      <select name="sort" class="fi-select" onchange="this.form.submit()">
+        <option value="newest"    {% if sort=='newest'    %}selected{% endif %}>Newest First</option>
+        <option value="oldest"    {% if sort=='oldest'    %}selected{% endif %}>Oldest First</option>
+        <option value="title"     {% if sort=='title'     %}selected{% endif %}>A → Z</option>
+        <option value="rating"    {% if sort=='rating'    %}selected{% endif %}>Top Rated</option>
+        <option value="available" {% if sort=='available' %}selected{% endif %}>Available</option>
+      </select>
+      <button type="submit" class="fi-btn">Search</button>
+      {% if search or sel_genre %}
+        <a href="{{ url_for('index') }}" class="fi-clear">Clear</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Two-column layout: Books + Activity -->
+<div class="dash-body">
+
+  <!-- Book Grid -->
+  <section class="books-section">
+    <div class="section-header">
+      <h2 class="section-title">Book Catalogue</h2>
+      <span class="section-count">{{ books|length }} book{% if books|length!=1 %}s{% endif %}</span>
+    </div>
+
+    {% if books %}
+    <div class="book-grid" id="book-grid">
+      {% for book in books %}
+      <div class="book-card" style="--spine: {{ book.cover_color }}">
+        <div class="bc-spine"></div>
+        <div class="bc-body">
+          <div class="bc-top">
+            <span class="bc-genre">{{ book.genre }}</span>
+            <span class="bc-avail {% if book.available>0 %}av-yes{% else %}av-no{% endif %}">
+              {% if book.available>0 %}{{ book.available }} left{% else %}Unavailable{% endif %}
+            </span>
+          </div>
+          <h3 class="bc-title">{{ book.title }}</h3>
+          <p class="bc-author"><i class="bi bi-person me-1"></i>{{ book.author }}</p>
+          {% if book.year %}<p class="bc-meta-line"><i class="bi bi-calendar3 me-1"></i>{{ book.year }}</p>{% endif %}
+          {% if book.rating_count > 0 %}
+          <div class="bc-rating">
+            {% for i in range(5) %}
+              <i class="bi bi-star{% if i < book.rating|int %}-fill{% elif i < book.rating %}-half{% endif %}"></i>
+            {% endfor %}
+            <span>{{ "%.1f"|format(book.rating) }}</span>
+          </div>
+          {% endif %}
+          {% if book.description %}
+          <p class="bc-desc">{{ book.description[:80] }}{% if book.description|length>80 %}…{% endif %}</p>
+          {% endif %}
+        </div>
+        <div class="bc-actions">
+          <a href="{{ url_for('book_detail', bid=book.id) }}" class="bca-btn bca-view"><i class="bi bi-eye"></i></a>
+          {% if book.available>0 %}
+            <a href="{{ url_for('borrow', bid=book.id) }}" class="bca-btn bca-borrow"><i class="bi bi-box-arrow-right me-1"></i>Issue</a>
+          {% else %}
+            <span class="bca-btn bca-borrow bca-disabled">No Copies</span>
+          {% endif %}
+          <a href="{{ url_for('edit_book', bid=book.id) }}" class="bca-btn bca-edit"><i class="bi bi-pencil"></i></a>
+          <button class="bca-btn bca-del" onclick="confirmDel({{ book.id }}, '{{ book.title|e }}')"><i class="bi bi-trash3"></i></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="es-icon">📚</div>
+      <h4>No books found</h4>
+      <p>Try different filters or <a href="{{ url_for('add_book') }}">add a new book</a>.</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Sidebar: Activity Feed -->
+  <aside class="dash-aside">
+    <div class="aside-card">
+      <h3 class="aside-title"><i class="bi bi-activity me-2"></i>Recent Activity</h3>
+      {% if recent_activity %}
+        <ul class="activity-feed">
+          {% for a in recent_activity %}
+          <li class="af-item">
+            <span class="af-dot"></span>
+            <div>
+              <div class="af-action">{{ a.action }}</div>
+              {% if a.detail %}<div class="af-detail">{{ a.detail }}</div>{% endif %}
+              <div class="af-time">{{ a.timestamp }}</div>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted small p-3">No activity yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="aside-card mt-3">
+      <h3 class="aside-title"><i class="bi bi-lightning me-2"></i>Quick Actions</h3>
+      <div class="quick-actions">
+        <a href="{{ url_for('add_book') }}"        class="qa-btn"><i class="bi bi-plus-circle"></i>Add Book</a>
+        <a href="{{ url_for('members') }}"          class="qa-btn"><i class="bi bi-person-plus"></i>New Member</a>
+        <a href="{{ url_for('borrowers', status='overdue') }}" class="qa-btn qa-warn"><i class="bi bi-exclamation-circle"></i>Overdue ({{ stats.overdue }})</a>
+        <a href="{{ url_for('reports') }}"          class="qa-btn"><i class="bi bi-bar-chart"></i>Reports</a>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="delModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:360px">
+    <div class="modal-content modal-pro">
+      <div class="modal-body text-center p-5">
+        <div style="font-size:2.8rem;margin-bottom:.8rem">🗑️</div>
+        <h5 class="mb-1">Remove Book?</h5>
+        <p class="modal-book-name" id="del-title"></p>
+        <p class="text-muted small mb-4">This cannot be undone.</p>
+        <div class="d-flex gap-2 justify-content-center">
+          <button class="btn-modal-cancel" data-bs-dismiss="modal">Cancel</button>
+          <a id="del-confirm" href="#" class="btn-modal-del">Delete</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

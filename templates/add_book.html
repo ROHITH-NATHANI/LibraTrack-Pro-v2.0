@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Add Book — LibraTrack Pro{% endblock %}
+{% block content %}
+
+<div class="dash-header">
+  <div>
+    <a href="{{ url_for('index') }}" class="back-link"><i class="bi bi-arrow-left me-1"></i>Dashboard</a>
+    <h1 class="page-title mt-1">Add New Book</h1>
+    <p class="page-sub">Fill in the details to add a book to your library collection.</p>
+  </div>
+</div>
+
+<div class="form-layout">
+  <div class="form-main">
+    <div class="form-card">
+      <form id="add-book-form" method="POST" novalidate>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="fl">Book Title <span class="req">*</span></label>
+            <input type="text" name="title" id="f-title" class="fi" placeholder="e.g. The Great Gatsby" value="{{ form_data.get('title','') }}">
+            <div class="ferr" id="err-title"></div>
+          </div>
+          <div class="form-group">
+            <label class="fl">Author Name <span class="req">*</span></label>
+            <input type="text" name="author" id="f-author" class="fi" placeholder="e.g. F. Scott Fitzgerald" value="{{ form_data.get('author','') }}">
+            <div class="ferr" id="err-author"></div>
+          </div>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="fl">Genre <span class="req">*</span></label>
+            <select name="genre" id="f-genre" class="fi">
+              <option value="">Select…</option>
+              {% for g in ['Fiction','Non-Fiction','Technology','Science','History','Biography','Self-Help','Mystery','Fantasy','Romance','Children','Academic','Poetry','Philosophy'] %}
+                <option value="{{ g }}" {% if form_data.get('genre')==g %}selected{% endif %}>{{ g }}</option>
+              {% endfor %}
+            </select>
+            <div class="ferr" id="err-genre"></div>
+          </div>
+          <div class="form-group">
+            <label class="fl">Publisher</label>
+            <input type="text" name="publisher" class="fi" placeholder="Publisher name" value="{{ form_data.get('publisher','') }}">
+          </div>
+          <div class="form-group">
+            <label class="fl">Year Published</label>
+            <input type="number" name="year" class="fi" placeholder="e.g. 2023" min="1000" max="2026" value="{{ form_data.get('year','') }}">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="fl">ISBN</label>
+            <input type="text" name="isbn" class="fi" placeholder="978-XXXXXXXXXX" value="{{ form_data.get('isbn','') }}">
+          </div>
+          <div class="form-group">
+            <label class="fl">Number of Copies <span class="req">*</span></label>
+            <input type="number" name="copies" id="f-copies" class="fi" min="1" max="99" placeholder="1" value="{{ form_data.get('copies','1') }}">
+            <div class="ferr" id="err-copies"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="fl">Description</label>
+          <textarea name="description" class="fi" rows="3" placeholder="Brief description of the book…">{{ form_data.get('description','') }}</textarea>
+        </div>
+
+        <!-- Cover Color Picker -->
+        <div class="form-group">
+          <label class="fl">Cover Color</label>
+          <div class="color-picker-row">
+            {% set colors = ['#e8d5b7','#c8dfc8','#d0d8f0','#f0d8d0','#ddd0f0','#f0eac8','#d0eef0','#f0dde8','#e0e8d8','#f8e8d0'] %}
+            {% for col in colors %}
+              <label class="cp-swatch">
+                <input type="radio" name="cover_color" value="{{ col }}" {% if (form_data.get('cover_color', '#c8dfc8')==col) or (loop.index==2 and not form_data.get('cover_color')) %}checked{% endif %}>
+                <span style="background:{{ col }}"></span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="form-actions mt-4">
+          <button type="submit" class="btn-submit" id="submit-btn"><i class="bi bi-plus-circle me-2"></i>Add to Library</button>
+          <a href="{{ url_for('index') }}" class="btn-cancel">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Live Preview -->
+  <div class="form-preview">
+    <div class="preview-label">Live Preview</div>
+    <div class="book-card preview-card" style="--spine: #c8dfc8" id="preview-card">
+      <div class="bc-spine"></div>
+      <div class="bc-body">
+        <div class="bc-top">
+          <span class="bc-genre" id="prev-genre">Genre</span>
+          <span class="bc-avail av-yes" id="prev-avail">1 left</span>
+        </div>
+        <h3 class="bc-title" id="prev-title">Book Title</h3>
+        <p class="bc-author"><i class="bi bi-person me-1"></i><span id="prev-author">Author Name</span></p>
+      </div>
+      <div class="bc-actions">
+        <span class="bca-btn bca-view"><i class="bi bi-eye"></i></span>
+        <span class="bca-btn bca-borrow"><i class="bi bi-box-arrow-right me-1"></i>Issue</span>
+      </div>
+    </div>
+    <p class="preview-hint">Updates as you type</p>
+  </div>
+</div>
+{% endblock %}

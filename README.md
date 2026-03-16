@@ -111,6 +111,7 @@ python app.py
 git init
 git add .
 git commit -m "feat: LibraTrack Pro v2 - full library management system"
-git remote add origin https://github.com/yourusername/libra-pro.git
+git branch -M main
+git remote add origin https://github.com/ROHITH-NATHANI/LibraTrack-Pro-v2.0.git
 git push -u origin main
 ```

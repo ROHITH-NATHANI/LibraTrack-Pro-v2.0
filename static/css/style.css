@@ -25,6 +25,27 @@
   --ff-b: 'Plus Jakarta Sans', sans-serif;
 }
 
+/* ── Dark Mode Variables ────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg:        #121212;
+  --white:     #1e1e1e;
+  --ink:       #e4e4e7;
+  --ink-2:     #a1a1aa;
+  --ink-3:     #71717a;
+  --border:    #333333;
+  --border-2:  #404040;
+  --sage:      #6db28b;
+  --sage-lt:   #1a2e22;
+  --amber:     #fbbf24;
+  --amber-lt:  #452103;
+  --red:       #f87171;
+  --red-lt:    #450a0a;
+  --blue:      #60a5fa;
+  --blue-lt:   #1e3a8a;
+  --shadow:    0 2px 10px rgba(0,0,0,0.5);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.6);
+}
+
 /* ── Reset ──────────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--ff-b); background: var(--bg); color: var(--ink); min-height: 100vh; display: flex; font-size: 14.5px; }
@@ -762,6 +783,31 @@ textarea.fi { resize: vertical; min-height: 80px; }
 .dc-author-label { font-size: .8rem; color: var(--ink-2); margin-top: .3rem; }
 .dc-rating { font-size: .85rem; color: #f59e0b; }
 .dc-rating span { color: var(--ink-3); font-size: .78rem; margin-left: .2rem; }
+
+/* Rating Form */
+.rating-stars {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.rating-stars input[type="radio"] {
+  display: none;
+}
+
+.rating-stars label {
+  font-size: 1.5rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.rating-stars label i {
+  color: #ddd;
+}
+
+.rating-stars input[type="radio"]:checked + label i {
+  color: #f59e0b;
+}
 
 .detail-info-card {
   background: var(--white); border: 1px solid var(--border);

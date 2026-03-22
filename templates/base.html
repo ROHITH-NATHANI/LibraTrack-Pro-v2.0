@@ -8,6 +8,11 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <script>
+    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.dataset.theme = 'dark';
+    }
+  </script>
 </head>
 <body>
 
@@ -49,6 +54,25 @@
     <a href="{{ url_for('reports') }}" class="nav-item {% if request.endpoint=='reports' %}active{% endif %}">
       <i class="bi bi-bar-chart-line"></i><span>Reports</span>
     </a>
+    <div class="nav-section-label mt-3">Account</div>
+    {% if session.get('user_id') %}
+    <a href="{{ url_for('wishlist') }}" class="nav-item {% if request.endpoint=='wishlist' %}active{% endif %}">
+      <i class="bi bi-heart"></i><span>My Wishlist</span>
+    </a>
+    <a href="{{ url_for('my_loans') }}" class="nav-item {% if request.endpoint=='my_loans' %}active{% endif %}">
+      <i class="bi bi-wallet2"></i><span>My Loans / Fines</span>
+    </a>
+    <a href="{{ url_for('logout') }}" class="nav-item text-danger">
+      <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+    </a>
+    {% else %}
+    <a href="{{ url_for('login') }}" class="nav-item {% if request.endpoint=='login' %}active{% endif %}">
+      <i class="bi bi-box-arrow-in-right"></i><span>Login</span>
+    </a>
+    <a href="{{ url_for('register') }}" class="nav-item {% if request.endpoint=='register' %}active{% endif %}">
+      <i class="bi bi-person-plus"></i><span>Register</span>
+    </a>
+    {% endif %}
   </nav>
 
   <div class="sidebar-footer">
@@ -75,6 +99,9 @@
       <a href="{{ url_for('borrowers', status='overdue') }}" class="topbar-btn" title="Overdue Books">
         <i class="bi bi-exclamation-triangle"></i>
       </a>
+      <button id="theme-toggle" class="topbar-btn" title="Toggle Dark Mode">
+        <i class="bi bi-moon"></i>
+      </button>
       <a href="{{ url_for('add_book') }}" class="topbar-cta">
         <i class="bi bi-plus-lg me-1"></i>Add Book
       </a>
@@ -105,5 +132,31 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script>
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeIcon = themeToggle.querySelector('i');
+  
+  function updateThemeIcon() {
+    if (document.documentElement.dataset.theme === 'dark') {
+      themeIcon.classList.replace('bi-moon', 'bi-sun');
+    } else {
+      themeIcon.classList.replace('bi-sun', 'bi-moon');
+    }
+  }
+  
+  updateThemeIcon();
+  
+  themeToggle.addEventListener('click', () => {
+    if (document.documentElement.dataset.theme === 'dark') {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.dataset.theme = 'dark';
+      localStorage.setItem('theme', 'dark');
+    }
+    updateThemeIcon();
+  });
+</script>
+{% block scripts %}{% endblock %}
 </body>
 </html>

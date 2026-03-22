@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Member Login — LibraTrack Pro{% endblock %}
+{% block content %}
+
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h2>Member Login</h2>
+      <p>Access your library account</p>
+    </div>
+
+    <form method="POST" class="login-form">
+      <div class="form-group mb-3">
+        <label for="email" class="form-label">
+          <i class="bi bi-envelope"></i> Email Address
+        </label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          class="form-control" 
+          placeholder="your@email.com"
+          required 
+          autofocus
+        />
+      </div>
+
+      <div class="form-group mb-4">
+        <label for="password" class="form-label">
+          <i class="bi bi-lock"></i> Password
+        </label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          class="form-control" 
+          placeholder="Enter your password"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn btn-login w-100">
+        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p>Don't have an account? <a href="{{ url_for('members') }}">Register here</a></p>
+    </div>
+  </div>
+</div>
+
+<style>
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  background: linear-gradient(135deg, var(--blue-lt) 0%, var(--sage-lt) 100%);
+}
+
+.login-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-header h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+
+.login-header p {
+  color: var(--ink-2);
+  font-size: 0.95rem;
+}
+
+.login-form .form-label {
+  font-weight: 500;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.login-form .form-control {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.login-form .form-control:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.btn-login {
+  background: var(--blue);
+  color: white;
+  border: none;
+  padding: 0.85rem 1rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-login:hover {
+  background: #1d4ed8;
+  color: white;
+  text-decoration: none;
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.login-footer a {
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .login-card {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+}
+</style>
+
+{% endblock %}

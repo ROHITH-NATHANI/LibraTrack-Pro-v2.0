@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}My Loans & Fines — LibraTrack Pro{% endblock %}
+{% block content %}
+
+<div class="dash-header">
+  <div>
+    <h1 class="page-title"><i class="bi bi-wallet2 text-sage me-2"></i>My Loans & Fines</h1>
+    <p class="page-sub mt-2">View your current active book loans, and manage any pending overdue fines.</p>
+  </div>
+</div>
+
+<div class="row" style="gap:2rem">
+  <!-- Active Loans -->
+  <div class="col-lg-12 mb-4">
+    <h3 class="section-title mb-3">Active Loans</h3>
+    {% if active_loans %}
+    <div class="table-card" style="animation: fadeUp 0.35s ease;">
+      <table class="table-pro">
+        <thead><tr><th>Book</th><th>Borrowed On</th><th>Due Date</th><th>Current Status</th></tr></thead>
+        <tbody>
+          {% for br in active_loans %}
+          {% set cur_fine = calc_fine(br.due_date) %}
+          <tr class="{% if cur_fine > 0 %}tr-overdue{% endif %}">
+            <td>
+              <div class="td-title">{{ br.title }}</div>
+              <div class="td-sub">{{ br.author }}</div>
+            </td>
+            <td>{{ br.borrow_date }}</td>
+            <td class="{% if cur_fine > 0 %}text-danger fw-bold{% endif %}">{{ br.due_date }}</td>
+            <td>
+              {% if cur_fine > 0 %}
+                <span class="pill pill-red">Overdue (Est. Fine: ₹{{ cur_fine }})</span>
+              {% else %}
+                <span class="pill pill-green">On Time</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state p-4 border rounded" style="background:var(--white)">
+      <i class="bi bi-check-circle text-success fs-1"></i>
+      <h4 class="mt-2">No Active Loans</h4>
+      <p class="text-muted">You have returned all your books. Discover more to read!</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Past Loans & Fines -->
+  <div class="col-lg-12">
+    <h3 class="section-title mb-3">Past Loans & Fines</h3>
+    {% if past_loans %}
+    <div class="table-card" style="animation: fadeUp 0.45s ease;">
+      <table class="table-pro">
+        <thead><tr><th>Book</th><th>Returned On</th><th>Fine Amount</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for br in past_loans %}
+          <tr>
+            <td>
+              <div class="td-title">{{ br.title }}</div>
+              <div class="td-sub">{{ br.author }}</div>
+            </td>
+            <td>{{ br.return_date }}</td>
+            <td>
+              {% if br.fine > 0 %}
+                <strong class="text-danger" id="fine-amt-{{ br.id }}">₹{{ "%.2f"|format(br.fine) }}</strong>
+              {% else %}
+                <span class="text-success" style="font-weight:600;"><i class="bi bi-check-lg"></i> Cleared</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if br.fine > 0 %}
+                <button class="btn btn-sm btn-outline-danger pay-fine-btn" data-rid="{{ br.id }}" style="border-radius:6px; font-weight:600;">Pay Fine</button>
+              {% else %}
+                <button class="btn btn-sm btn-light disabled" style="opacity:0.6; border-radius:6px; font-weight:600;"><i class="bi bi-check2-all"></i> Paid</button>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state p-4 border rounded shadow-sm" style="background:var(--white)">
+      <i class="bi bi-clock-history text-muted fs-1 mb-2"></i>
+      <h4 class="mt-2">No Past Loans</h4>
+      <p class="text-muted">You haven't completed any loans yet.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Simulated Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:380px">
+    <div class="modal-content modal-pro p-4">
+      <div class="modal-body text-center">
+        <i class="bi bi-credit-card text-sage mb-3" style="font-size: 3rem;"></i>
+        <h4 class="mb-2">Pay Outstanding Fine</h4>
+        <p class="text-muted mb-4">Click below to simulate processing a payment.</p>
+        
+        <button id="confirm-payment-btn" class="btn btn-primary w-100 py-2 fw-bold" style="background:var(--sage); border:none;">Simulate Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+  let selectedRid = null;
+  let clickedBtn = null;
+
+  $('.pay-fine-btn').click(function() {
+    selectedRid = $(this).data('rid');
+    clickedBtn = $(this);
+    $('#paymentModal').modal('show');
+  });
+
+  $('#confirm-payment-btn').click(function() {
+    let btn = $(this);
+    btn.prop('disabled', true).html('<i class="bi bi-arrow-repeat spin"></i> Processing...');
+    
+    $.ajax({
+      url: '/pay_fine/' + selectedRid,
+      type: 'POST',
+      success: function(res) {
+        setTimeout(function() { 
+          $('#paymentModal').modal('hide');
+          btn.prop('disabled', false).text('Simulate Payment');
+          
+          if(res.success) {
+            $('#fine-amt-' + selectedRid).removeClass('text-danger').addClass('text-success').html('<i class="bi bi-check-lg"></i> Cleared');
+            clickedBtn.removeClass('btn-outline-danger').addClass('btn-light disabled').html('<i class="bi bi-check2-all"></i> Paid').off('click');
+          }
+        }, 1200);
+      },
+      error: function(err) {
+        $('#paymentModal').modal('hide');
+        btn.prop('disabled', false).text('Simulate Payment');
+        alert(err.responseJSON ? err.responseJSON.error : 'Payment failed.');
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

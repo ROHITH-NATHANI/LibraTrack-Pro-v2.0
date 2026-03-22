@@ -8,6 +8,9 @@
     <h1 class="page-title mt-1">Book Details</h1>
   </div>
   <div class="d-flex gap-2">
+    {% if session.get('user_id') %}
+      <a href="{{ url_for('add_wishlist', bid=book.id) }}" class="btn-outline-action text-danger border-danger"><i class="bi bi-heart me-1"></i>Wishlist</a>
+    {% endif %}
     <a href="{{ url_for('edit_book', bid=book.id) }}" class="btn-outline-action"><i class="bi bi-pencil me-1"></i>Edit</a>
     {% if book.available > 0 %}
       <a href="{{ url_for('borrow', bid=book.id) }}" class="btn-primary-action"><i class="bi bi-box-arrow-right me-1"></i>Issue Book</a>
@@ -58,6 +61,21 @@
       <div class="dim-item"><span class="dim-lbl">Available</span><span class="dim-val">{{ book.available }}</span></div>
       <div class="dim-item"><span class="dim-lbl">Added On</span><span class="dim-val">{{ book.added_on }}</span></div>
     </div>
+
+    <!-- Rating Form -->
+    <div class="mt-4">
+      <h4 class="mb-2">Rate & Review</h4>
+      <form id="rating-form" method="post" action="{{ url_for('rate_book', bid=book.id) }}">
+        <div class="rating-stars mb-2">
+          {% for i in range(5, 0, -1) %}
+            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" />
+            <label for="star{{ i }}" title="{{ i }} star"><i class="bi bi-star"></i></label>
+          {% endfor %}
+        </div>
+        <textarea name="comment" class="form-control mb-2 border mt-1" rows="2" placeholder="Write a short review (optional)..." style="font-size:0.9rem;border-radius:8px;"></textarea>
+        <button type="submit" class="btn btn-sm btn-primary">Submit Review</button>
+      </form>
+    </div>
   </div>
 </div>
 
@@ -95,4 +113,100 @@
     </div>
   {% endif %}
 </div>
+
+<!-- Member Reviews -->
+<div class="detail-reviews mt-4">
+  <h3 class="section-title mb-3"><i class="bi bi-chat-left-text me-2"></i>Reader Reviews</h3>
+  <div class="reviews-list" id="reviews-list">
+    {% for r in reviews %}
+    <div class="review-card mb-3 p-3 bg-white border rounded shadow-sm">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0 fw-bold">{{ r.member_name }}</h6>
+        <div class="text-warning small">
+          {% for i in range(5) %}
+            <i class="bi bi-star{% if i < r.rating|int %}-fill{% endif %}"></i>
+          {% endfor %}
+          <span class="text-muted ms-2">{{ r.timestamp[:10] }}</span>
+        </div>
+      </div>
+      {% if r.comment %}
+        <p class="mb-0 text-secondary" style="font-size: 0.9rem;">{{ r.comment }}</p>
+      {% endif %}
+    </div>
+    {% else %}
+    <div id="no-reviews-msg" class="text-muted fst-italic">No reviews yet. Be the first to share your thoughts!</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+  $('.rating-stars label').hover(
+    function() {
+      $(this).prevAll('label').addBack().find('i').removeClass('bi-star').addClass('bi-star-fill');
+    },
+    function() {
+      $('.rating-stars label i').removeClass('bi-star-fill').addClass('bi-star');
+      $('.rating-stars input:checked').next('label').find('i').addClass('bi-star-fill');
+    }
+  );
+
+  $('.rating-stars input').change(function() {
+    $('.rating-stars label i').removeClass('bi-star-fill').addClass('bi-star');
+    $(this).next('label').find('i').addClass('bi-star-fill');
+  });
+
+  $('#rating-form').on('submit', function(e) {
+    e.preventDefault();
+    var formData = $(this).serialize();
+    $.post($(this).attr('action'), formData)
+      .done(function(data) {
+        if (data.error) {
+          alert(data.error);
+        } else {
+          // Update the rating display
+          $('.dc-rating span').text(data.rating.toFixed(1) + ' (' + data.rating_count + ' ratings)');
+          // Update stars
+          var starsHtml = '';
+          for (var i = 0; i < 5; i++) {
+            if (i < Math.floor(data.rating)) {
+              starsHtml += '<i class="bi bi-star-fill"></i>';
+            } else if (i < data.rating) {
+              starsHtml += '<i class="bi bi-star-half"></i>';
+            } else {
+              starsHtml += '<i class="bi bi-star"></i>';
+            }
+          }
+          $('.dc-rating').html(starsHtml + '<span>' + data.rating.toFixed(1) + ' (' + data.count + ' ratings)</span>');
+          
+          $('#no-reviews-msg').remove();
+          var rev = data.review;
+          var revStars = '';
+          for (var j = 0; j < 5; j++) {
+            revStars += '<i class="bi bi-star' + (j < rev.rating ? '-fill' : '') + '"></i>';
+          }
+          var revHtml = '<div class="review-card mb-3 p-3 bg-white border rounded shadow-sm" style="animation: fadeUp 0.3s ease;">' +
+            '<div class="d-flex justify-content-between align-items-center mb-2">' +
+            '<h6 class="mb-0 fw-bold">' + rev.member_name + '</h6>' +
+            '<div class="text-warning small">' + revStars + '<span class="text-muted ms-2">' + rev.timestamp.substring(0,10) + '</span></div></div>';
+          if (rev.comment) {
+            revHtml += '<p class="mb-0 text-secondary" style="font-size: 0.9rem;">' + $('<div>').text(rev.comment).html() + '</p>';
+          }
+          revHtml += '</div>';
+          $('#reviews-list').prepend(revHtml);
+          
+          alert('Thank you for rating and reviewing this book!');
+          // Reset form
+          $('#rating-form')[0].reset();
+          $('.rating-stars label i').removeClass('bi-star-fill').addClass('bi-star');
+        }
+      })
+      .fail(function(x) {
+        alert(x.responseJSON ? x.responseJSON.error : 'Error submitting review. Please try again.');
+      });
+  });
+});
+</script>
 {% endblock %}

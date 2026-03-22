@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Error — LibraTrack Pro{% endblock %}
+{% block content %}
+
+<div class="error-container">
+  <div class="error-card">
+    <div class="error-icon">
+      <i class="bi bi-exclamation-triangle"></i>
+    </div>
+    <h2>Oops! Something went wrong</h2>
+    <p class="error-message">{{ error }}</p>
+    <div class="error-actions">
+      <a href="{{ url_for('home') }}" class="btn btn-primary">
+        <i class="bi bi-house me-2"></i>Back to Home
+      </a>
+      <a href="{{ url_for('index') }}" class="btn btn-secondary">
+        <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+.error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.error-card {
+  text-align: center;
+  background: var(--white);
+  padding: 3rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.error-icon {
+  font-size: 4rem;
+  color: var(--red);
+  margin-bottom: 1.5rem;
+}
+
+.error-card h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--ink);
+}
+
+.error-message {
+  font-size: 1rem;
+  color: var(--ink-2);
+  margin-bottom: 2rem;
+}
+
+.error-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--blue);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+  color: white;
+}
+
+.btn-secondary {
+  background: var(--border);
+  color: var(--ink);
+}
+
+.btn-secondary:hover {
+  background: var(--border-2);
+}
+</style>
+
+{% endblock %}

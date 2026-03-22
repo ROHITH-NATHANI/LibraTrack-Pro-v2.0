@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}My Wishlist — LibraTrack Pro{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="page-title"><i class="bi bi-heart text-danger me-2"></i>My Wishlist</h1>
+  <div>
+    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+      <i class="bi bi-compass"></i> Discover Books
+    </a>
+  </div>
+</div>
+
+<div class="books-grid">
+  {% for book in books %}
+  <div class="book-card" data-href="{{ url_for('book_detail', bid=book.id) }}" onclick="window.location=this.dataset.href">
+    <div class="book-cover" {{ 'style="background-color: '~book.cover_color~';"'|safe }}>
+      <div class="book-year">{{ book.year or 'N/A' }}</div>
+    </div>
+    <div class="book-info">
+      <div class="book-meta">
+        <span class="book-genre">{{ book.genre }}</span>
+        <span class="book-rating"><i class="bi bi-star-fill text-warning"></i> {{ "%.1f"|format(book.rating) }}</span>
+      </div>
+      <h3 class="book-title" title="{{ book.title }}">{{ book.title }}</h3>
+      <p class="book-author">{{ book.author }}</p>
+      
+      <div class="book-footer mt-auto pt-3">
+        <div class="book-status">
+          {% if book.available > 0 %}
+            <span class="badge bg-success-subtle text-success">Available</span>
+          {% else %}
+            <span class="badge bg-danger-subtle text-danger">Checked Out</span>
+          {% endif %}
+        </div>
+        
+        <a href="{{ url_for('remove_wishlist', bid=book.id) }}" class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation();" title="Remove from Wishlist">
+          <i class="bi bi-trash"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem;">
+    <i class="bi bi-heart-break text-muted mb-3" style="font-size: 3rem;"></i>
+    <h3>Your wishlist is empty</h3>
+    <p class="text-muted">Discover interesting books and add them to your wishlist to keep track of what you want to read next.</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">Browse Library</a>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
